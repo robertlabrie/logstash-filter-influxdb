@@ -20,6 +20,8 @@ class LogStash::Filters::Influxdb < LogStash::Filters::Base
 
   # Replace the message with this value.
   config :source, :validate => :string, :default => "message"
+  config :parse_types, :validate => :boolean, :default => false
+  config :time_format, :validate => :string, :default => nil
 
   public
   def register
@@ -29,7 +31,10 @@ class LogStash::Filters::Influxdb < LogStash::Filters::Base
   public
   def filter(event)
     
-    point = InfluxParser.parse_point(event.get(@source))
+    point = InfluxParser.parse_point(event.get(@source),{
+      :parse_types => @parse_types,
+      :time_format => @time_format
+    })
 
     if point
       event.set('point', point)
